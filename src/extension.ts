@@ -19,21 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
     // The commandId parameter must match the command field in package.json
     let disposable = vscode.commands.registerCommand('extension.ckmon', () => {
         // The code you place here will be executed every time your command is executed
-        // const textEditor = vscode.window.activeTextEditor;
-        // if( !textEditor){
-        //     vscode.window.showWarningMessage('CKMon to Text can only run if a CKMon file is currently dispayed in the text editor.');
-        //     return;
-        // }
-        // const activeFileName = vscode.window.activeTextEditor.document.fileName;
-        // if( !activeFileName.endsWith('ckmon')){
-        //     vscode.window.showWarningMessage('Cannot perform CKMon to Text conversion on non CKMon files.');
-        //     return;
-        // }
-        const textEditor = vscode.window.activeTextEditor;
-        const uri = textEditor ?
-            vscode.window.activeTextEditor.document.uri :
-            vscode.workspace.rootPath;
 
+        const textEditor = vscode.window.activeTextEditor;
+        if( textEditor && !textEditor.document.fileName.endsWith('ckmon')){
+            vscode.window.showWarningMessage('Cannot perform CKMon to Text conversion on non CKMon files.');
+            return;
+        }
+        
+        const uri = textEditor ? textEditor.document.uri :vscode.workspace.rootPath;
         const previewUri = vscode.Uri.parse(`${CKMonContentProvider.scheme}:${uri}`);
 		return vscode.workspace.openTextDocument(previewUri).then(doc => {
             if( textEditor){
@@ -43,13 +36,6 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showTextDocument(doc);
             }
         });
-        
-        // const processExecution = new vscode.ProcessExecution('CKMonToText.exe', [activeFileName]);
-        // vscode.ProcessExecution
-
-        // ckMonContentProvider.processCKMon(vscode.window.activeTextEditor.document).then( allCkMonText => {
-        //     vscode.window.activeTextEditor.edit( builder => builder.replace(new vscode.Position(0,0), allCkMonText));
-        // });
     });
 
     context.subscriptions.push(disposable, ckMonProvider);
