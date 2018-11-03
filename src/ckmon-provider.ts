@@ -12,14 +12,13 @@ export class CKMonContentProvider implements vscode.TextDocumentContentProvider 
     constructor(private context: vscode.ExtensionContext) {
     }
 
-    processCKMon( sourceDocument: vscode.TextDocument ) : Promise<string> {
+    processCKMon( uri: vscode.Uri ) : Promise<string> {
         return new Promise( (resolve, reject ) => {
 
-            const activeFileName = sourceDocument.fileName;
             const extensionPath = this.context.extensionPath;
             const processorPath = extensionPath + '\\out\\ckmontotext\\CKMonWrapper.dll';
 
-            execFile( "dotnet", [processorPath, activeFileName], ( error, stdout, stderr) =>{
+            execFile( "dotnet", [processorPath, uri.path], ( error, stdout, stderr) =>{
                 if(error){
                     vscode.window.showErrorMessage(error);
                     reject(error);
@@ -27,12 +26,12 @@ export class CKMonContentProvider implements vscode.TextDocumentContentProvider 
                 else {
                     // Display a message box to the user
                     vscode.window.showInformationMessage('CKMon!');
-    
-                    return vscode.workspace.openTextDocument( activeFileName + '.txt' )
-                        .then( d => {
-                            const allDocumentText = d.getText();
-                            resolve(allDocumentText);
-                        });
+                    resolve(stdout);
+                    // return vscode.workspace.openTextDocument( activeFileName + '.txt' )
+                    //     .then( d => {
+                    //         const allDocumentText = d.getText();
+                    //         resolve(stdout);
+                    //     });
                 }
                 // console.log(arguments)
             } );
@@ -42,8 +41,7 @@ export class CKMonContentProvider implements vscode.TextDocumentContentProvider 
     provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
         console.log("PreviewUri", uri);
 
-        const sourceDocument = vscode.window.activeTextEditor.document;
-        return this.processCKMon(sourceDocument);
+        return this.processCKMon(uri);
     }
 }
 
