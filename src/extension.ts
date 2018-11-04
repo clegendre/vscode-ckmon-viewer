@@ -14,6 +14,12 @@ export function activate(context: vscode.ExtensionContext) {
     const ckMonContentProvider = new CKMonContentProvider( context );
     const ckMonProvider = vscode.workspace.registerTextDocumentContentProvider( CKMonContentProvider.scheme,  ckMonContentProvider);
 
+    const listener = vscode.workspace.onDidChangeTextDocument( evt =>  {
+        if( evt.document.uri.path.endsWith('ckmon') ){
+            
+        }
+    });
+
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
@@ -25,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showWarningMessage('Cannot perform CKMon to Text conversion on non CKMon files.');
             return;
         }
-        
+
         const uri = textEditor ? textEditor.document.uri :vscode.workspace.rootPath;
         const previewUri = vscode.Uri.parse(`${CKMonContentProvider.scheme}:${uri}`);
 		return vscode.workspace.openTextDocument(previewUri).then(doc => {
@@ -38,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
-    context.subscriptions.push(disposable, ckMonProvider);
+    context.subscriptions.push(disposable, ckMonProvider, listener);
 }
 
 // this method is called when your extension is deactivated
